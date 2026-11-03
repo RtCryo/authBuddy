@@ -1,0 +1,7 @@
+schema: spec-driven
+
+context: |
+  authBuddy is the homeBuddy identity service: it owns the shared family accounts used by
+  finanzBuddy and calendarBuddy, issues RS256 JWTs, and publishes a JWKS. Stack mirrors
+  finanzBuddy (Spring Boot 4 / Java 25 / Liquibase / PostgreSQL, Docker Compose).
+  It has no UI of its own; product UIs call it through their /api/auth proxies.
