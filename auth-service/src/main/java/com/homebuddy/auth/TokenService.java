@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 /** Issues homeBuddy account tokens as defined by the root {@code homebuddy-identity-contract}. */
 @Service
+@ServerMode
 public class TokenService {
 
     private final SigningKeys keys;

@@ -44,6 +44,10 @@ Everything else is denied. Errors are RFC 9457 problem details that never echo s
 
 Sign-in and registration attempts are limited by an in-memory sliding window, separately per client IP and per email (`AUTH_RATE_LIMIT_MAX_ATTEMPTS`, default 10 per minute), and answer `429` with `Retry-After`. The client IP comes from `X-Forwarded-For` only when the request arrives from a private-network proxy (Tomcat's remote-IP handling), so product UI proxies must forward the header (`proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for`). The limiter is per instance and resets on restart.
 
+## Legacy import
+
+`java -jar auth-service.jar import-legacy --file=users.csv` imports finanzBuddy users (`email,password_hash`) as accounts with new UUIDs and unchanged BCrypt hashes. The command starts with `auth.mode=import-legacy`: no web server, endpoints, or signing keys exist in that mode, so it cannot be reached over HTTP. Rows are inserted with `ON CONFLICT DO NOTHING`, which makes runs idempotent and keeps emails and hashes out of error messages; only counts are printed. See [`MIGRATION.md`](MIGRATION.md).
+
 ## Status
 
-Implemented: scaffold, `accounts` migration, register and login, RS256 issuance, and the JWKS. Still to come in the change `add-identity-service`: the legacy import, the migration runbook, and the Docker stack; update this file as each part lands.
+Implemented: scaffold, `accounts` migration, register and login, RS256 issuance, the JWKS, the legacy import, and the migration runbook. Still to come in the change `add-identity-service`: the Dockerfile and the compose stack; update this file when they land.

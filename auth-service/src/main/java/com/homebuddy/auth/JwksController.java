@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Publishes the public signing keys; private key material is never included. */
 @RestController
+@ServerMode
 class JwksController {
 
     private final SigningKeys keys;

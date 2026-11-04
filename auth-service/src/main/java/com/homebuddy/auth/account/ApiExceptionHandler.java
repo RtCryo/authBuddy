@@ -1,5 +1,6 @@
 package com.homebuddy.auth.account;
 
+import com.homebuddy.auth.ServerMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 /** Maps failures to RFC 9457 problem details without echoing submitted values. */
 @RestControllerAdvice
+@ServerMode
 class ApiExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)

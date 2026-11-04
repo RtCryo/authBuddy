@@ -1,5 +1,6 @@
 package com.homebuddy.auth.account;
 
+import com.homebuddy.auth.ServerMode;
 import com.homebuddy.auth.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Registration and sign-in with the contract finanzBuddy used, plus the account email. */
 @RestController
 @RequestMapping("/auth")
+@ServerMode
 class AuthController {
 
     private final AccountService accounts;

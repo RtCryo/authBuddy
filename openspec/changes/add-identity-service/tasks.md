@@ -12,8 +12,8 @@
 
 ## 3. Legacy import
 
-- [ ] 3.1 Implement the idempotent `import-legacy` command with count-only reporting; verify tests for new, existing, case-variant, and malformed rows, and that imported users sign in with their old passwords.
-- [ ] 3.2 Document the export query for finanzBuddy and the migration runbook in `docs/`.
+- [x] 3.1 Implement the idempotent `import-legacy` command with count-only reporting; verify tests for new, existing, case-variant, and malformed rows, and that imported users sign in with their old passwords.
+- [x] 3.2 Document the export query for finanzBuddy and the migration runbook in `docs/`.
 
 ## 4. Deployment and verification
 

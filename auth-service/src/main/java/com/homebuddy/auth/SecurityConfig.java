@@ -9,8 +9,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
-/** Stateless baseline: only the health probe is public until the account endpoints are added. */
+/** Stateless baseline: only the health probe, the JWKS, and register/login are public. */
 @Configuration
+@ServerMode
 class SecurityConfig {
 
     @Bean

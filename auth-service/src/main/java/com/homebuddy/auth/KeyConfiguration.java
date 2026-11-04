@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class KeyConfiguration {
 
     @Bean
+    @ServerMode
     SigningKeys signingKeys(AuthProperties properties) {
         return SigningKeys.from(properties);
     }

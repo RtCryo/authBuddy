@@ -1,6 +1,7 @@
 package com.homebuddy.auth.account;
 
 import com.homebuddy.auth.AuthProperties;
+import com.homebuddy.auth.ServerMode;
 import java.time.Clock;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
  * earlier attempts age out.
  */
 @Component
+@ServerMode
 class AttemptLimiter {
 
     private static final int SWEEP_THRESHOLD = 10_000;
