@@ -1,3 +1,8 @@
+# AI assistant tooling
+.opencode/
+.claude/
+.agents/
+
 # Secrets and local configuration
 .env
 *.pem
