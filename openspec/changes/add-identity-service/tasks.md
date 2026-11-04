@@ -2,7 +2,7 @@
 
 ## 1. Scaffolding
 
-- [ ] 1.1 Initialize `authBuddy/` as its own Git repository with `auth-service/` (Spring Boot 4.1, Java 25, web, security, validation, JPA, Liquibase, PostgreSQL, actuator), `docs/`, `AGENTS.md`, `.env.example`; verify `./mvnw verify` passes.
+- [x] 1.1 Initialize `authBuddy/` as its own Git repository with `auth-service/` (Spring Boot 4.1, Java 25, web, security, validation, JPA, Liquibase, PostgreSQL, actuator), `docs/`, `AGENTS.md`, `.env.example`; verify `./mvnw verify` passes.
 
 ## 2. Accounts and tokens
 
