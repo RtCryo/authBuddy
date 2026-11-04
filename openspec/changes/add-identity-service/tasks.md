@@ -18,4 +18,4 @@
 ## 4. Deployment and verification
 
 - [x] 4.1 Add Dockerfile, compose stack on the `homebuddy` network with alias `auth`, health checks, and secret handling; verify the stack starts and a product UI proxy reaches it.
-- [ ] 4.2 Add CI workflow; run tests and `openspec validate add-identity-service --strict`.
+- [x] 4.2 Add CI workflow; run tests and `openspec validate add-identity-service --strict`.
