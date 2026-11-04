@@ -14,21 +14,13 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @SpringBootTest
-@Testcontainers
-class AccountsMigrationTests {
+class AccountsMigrationTests extends IntegrationTest {
 
     private static final String CHANGELOG = "db/changelog/db.changelog-master.yaml";
-
-    @Container @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17-alpine");
 
     @Autowired JdbcTemplate jdbc;
     @Autowired DataSource dataSource;
@@ -53,9 +45,10 @@ class AccountsMigrationTests {
 
     @Test
     void rejectsDuplicateNormalizedEmail() {
-        insert("Family@Example.com", "family@example.com");
+        String normalized = "dup-" + UUID.randomUUID() + "@example.com";
+        insert(normalized.toUpperCase(), normalized);
 
-        assertThatThrownBy(() -> insert("family@example.com", "family@example.com"))
+        assertThatThrownBy(() -> insert(normalized, normalized))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 

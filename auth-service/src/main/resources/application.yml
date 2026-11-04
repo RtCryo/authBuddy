@@ -12,6 +12,12 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+auth:
+  signing-key: ${AUTH_SIGNING_KEY:}
+  signing-key-file: ${AUTH_SIGNING_KEY_FILE:}
+  previous-public-keys: ${AUTH_PREVIOUS_PUBLIC_KEYS:}
+  token-expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
 server:
   port: 8080
 
