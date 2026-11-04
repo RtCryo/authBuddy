@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-accounts
+      author: authBuddy
+      changes:
+        - createTable:
+            tableName: accounts
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_accounts
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(254)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email_normalized
+                  type: varchar(254)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_accounts_email_normalized
+              - column:
+                  name: password_hash
+                  type: varchar(72)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: accounts
