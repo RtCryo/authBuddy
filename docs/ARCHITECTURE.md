@@ -48,6 +48,16 @@ Sign-in and registration attempts are limited by an in-memory sliding window, se
 
 `java -jar auth-service.jar import-legacy --file=users.csv` imports finanzBuddy users (`email,password_hash`) as accounts with new UUIDs and unchanged BCrypt hashes. The command starts with `auth.mode=import-legacy`: no web server, endpoints, or signing keys exist in that mode, so it cannot be reached over HTTP. Rows are inserted with `ON CONFLICT DO NOTHING`, which makes runs idempotent and keeps emails and hashes out of error messages; only counts are printed. See [`MIGRATION.md`](MIGRATION.md).
 
+## Deployment
+
+`docker-compose.yml` runs PostgreSQL 18 (`authbuddy-postgres`, volume `authbuddy-postgres-data`) and `auth-service` (`authbuddy-auth-service`), both with health checks. `auth-service` joins the external `homebuddy` network with the alias `auth` and the stack's private default network; PostgreSQL is only on the default network.
+
+- Setup: `docker network create homebuddy` (or the root `docker-compose.yml`), copy `.env.example` to `.env` and set `POSTGRES_PASSWORD`, then create the signing key as a file: `mkdir secrets && openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out secrets/auth-signing-key.pem`.
+- Production: `docker compose -f docker-compose.yml up -d --build`. No host port is published and Traefik does not route to authBuddy; product UIs reach it at `http://auth:8080` through their `/api/auth/` proxies and product APIs read `http://auth:8080/.well-known/jwks.json`.
+- Local development: plain `docker compose up -d --build` also loads `docker-compose.override.yml`, which publishes the API on 8090 and PostgreSQL on 5434.
+- Secrets: the signing key is mounted as the Docker secret `auth_signing_key` and read through `AUTH_SIGNING_KEY_FILE`, so it never appears in the container environment or an image layer. `.env` and `secrets/` are ignored by Git. The mounted file must be readable by the container user; on a Linux host use `chmod 0644` on the file inside a `0700` directory, or inject the key through `AUTH_SIGNING_KEY` instead.
+- Image: multi-stage build (Maven, then a JRE-only Alpine image running as a non-root user).
+
 ## Status
 
-Implemented: scaffold, `accounts` migration, register and login, RS256 issuance, the JWKS, the legacy import, and the migration runbook. Still to come in the change `add-identity-service`: the Dockerfile and the compose stack; update this file when they land.
+Implemented: scaffold, `accounts` migration, register and login, RS256 issuance, the JWKS, the legacy import, the migration runbook, and the Docker stack. Still to come in the change `add-identity-service`: the CI workflow.

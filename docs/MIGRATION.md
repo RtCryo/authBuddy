@@ -34,6 +34,14 @@ docker exec finanzbuddy-postgres sh -c \
 
 The import is an operator-only command. It starts the application without a web server and without signing keys, so it is never reachable over HTTP. It needs only the database settings.
 
+In the deployed stack, run it as a one-off container next to the running database (from the authBuddy folder). The file is mounted read-only, and the command prints its counts and exits:
+
+```bash
+docker compose -f docker-compose.yml run --rm -T \
+  -v "$PWD/users.csv:/import/users.csv:ro" \
+  auth-service import-legacy --file=/import/users.csv
+```
+
 From a built jar (run from `auth-service/`, with the datasource variables of `.env` exported):
 
 ```bash

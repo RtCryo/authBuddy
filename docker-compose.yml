@@ -1,0 +1,78 @@
+# authBuddy stack: PostgreSQL and auth-service.
+#
+# auth-service joins the external `homebuddy` network with the alias `auth`
+# (root capability homebuddy-deployment), so product UIs proxy /api/auth/ to
+# http://auth:8080/auth/ and product APIs read http://auth:8080/.well-known/jwks.json.
+# It is not published to the host and is not routed through Traefik. Create
+# the network once with `docker network create homebuddy`, or let the root
+# docker-compose.yml create it.
+#
+# Production: docker compose -f docker-compose.yml up -d
+# Local development also loads docker-compose.override.yml automatically,
+# which publishes the host ports from the root port registry (API 8090,
+# PostgreSQL 5434).
+#
+# Secrets: the signing key is read from ./secrets/auth-signing-key.pem and
+# mounted as a Docker secret; neither it nor .env is committed.
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: authbuddy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-authbuddy}
+      POSTGRES_USER: ${POSTGRES_USER:-authbuddy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - authbuddy-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - default
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: authbuddy-auth-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-authbuddy}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-authbuddy}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      AUTH_SIGNING_KEY_FILE: /run/secrets/auth_signing_key
+      AUTH_PREVIOUS_PUBLIC_KEYS: ${AUTH_PREVIOUS_PUBLIC_KEYS:-}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      AUTH_REGISTRATION_ENABLED: ${AUTH_REGISTRATION_ENABLED:-true}
+      AUTH_RATE_LIMIT_MAX_ATTEMPTS: ${AUTH_RATE_LIMIT_MAX_ATTEMPTS:-10}
+    secrets:
+      - auth_signing_key
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/actuator/health/readiness || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks:
+      default: {}
+      homebuddy:
+        aliases:
+          - auth
+
+secrets:
+  auth_signing_key:
+    file: ./secrets/auth-signing-key.pem
+
+networks:
+  homebuddy:
+    external: true
+    name: homebuddy
+
+volumes:
+  authbuddy-postgres-data:
