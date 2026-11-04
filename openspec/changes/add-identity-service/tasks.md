@@ -7,7 +7,7 @@
 ## 2. Accounts and tokens
 
 - [x] 2.1 Add the `accounts` changeset with normalized unique email and rollback; verify migration test.
-- [ ] 2.2 Implement register/login with finanzBuddy-compatible validation and responses, BCrypt, registration switch, and rate limiting; verify integration tests for success, duplicate (any case), invalid input, wrong credentials, disabled registration, and 429.
+- [x] 2.2 Implement register/login with finanzBuddy-compatible validation and responses, BCrypt, registration switch, and rate limiting; verify integration tests for success, duplicate (any case), invalid input, wrong credentials, disabled registration, and 429.
 - [x] 2.3 Implement RS256 issuance with `kid`, issuer, audiences, and expiry, and the JWKS endpoint with current and previous keys; verify tests decode tokens with only the JWKS and cover rotation and startup without a key.
 
 ## 3. Legacy import

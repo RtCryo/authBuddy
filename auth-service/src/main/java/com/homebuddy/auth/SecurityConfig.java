@@ -24,6 +24,11 @@ class SecurityConfig {
                                         .permitAll()
                                         .requestMatchers(HttpMethod.GET, "/.well-known/jwks.json")
                                         .permitAll()
+                                        .requestMatchers(
+                                                HttpMethod.POST, "/auth/register", "/auth/login")
+                                        .permitAll()
+                                        .requestMatchers("/error")
+                                        .permitAll()
                                         .anyRequest()
                                         .denyAll())
                 .httpBasic(AbstractHttpConfigurer::disable)

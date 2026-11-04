@@ -17,9 +17,16 @@ auth:
   signing-key-file: ${AUTH_SIGNING_KEY_FILE:}
   previous-public-keys: ${AUTH_PREVIOUS_PUBLIC_KEYS:}
   token-expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  registration-enabled: ${AUTH_REGISTRATION_ENABLED:true}
+  rate-limit:
+    max-attempts: ${AUTH_RATE_LIMIT_MAX_ATTEMPTS:10}
+    window: 1m
 
 server:
   port: 8080
+  # Product UI proxies forward the client address in X-Forwarded-For. Tomcat trusts it only from
+  # private-network proxies, so the rate limiter sees the real client IP and it cannot be spoofed.
+  forward-headers-strategy: native
 
 management:
   endpoints:

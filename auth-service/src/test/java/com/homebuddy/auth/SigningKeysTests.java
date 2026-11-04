@@ -74,7 +74,9 @@ class SigningKeysTests {
                                 java.util.List.of(),
                                 "homebuddy-auth",
                                 java.util.List.of("finanzbuddy"),
-                                1000));
+                                1000,
+                                true,
+                                new AuthProperties.RateLimit(10, java.time.Duration.ofMinutes(1))));
         SigningKeys inline =
                 SigningKeys.from(TestKeys.properties(key.privateKey().replace("\n", "\\n")));
 

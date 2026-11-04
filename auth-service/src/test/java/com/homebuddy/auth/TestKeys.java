@@ -37,7 +37,9 @@ final class TestKeys {
                 java.util.List.of(previousPublicKeys),
                 "homebuddy-auth",
                 java.util.List.of("finanzbuddy", "calendarbuddy"),
-                86_400_000L);
+                86_400_000L,
+                true,
+                new AuthProperties.RateLimit(10, java.time.Duration.ofMinutes(1)));
     }
 
     private static String pem(String label, byte[] der) {
