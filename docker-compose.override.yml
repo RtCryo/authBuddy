@@ -1,0 +1,12 @@
+# Local-development overrides, loaded automatically by `docker compose`.
+# Publishes the host ports from the root port registry. Production omits this
+# file (`docker compose -f docker-compose.yml up -d`), so auth-service stays on
+# the internal networks.
+services:
+  postgres:
+    ports:
+      - "5434:5432"
+
+  auth-service:
+    ports:
+      - "8090:8080"

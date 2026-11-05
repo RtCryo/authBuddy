@@ -31,10 +31,10 @@ A family should use one homeBuddy account for every homeBuddy service. Today fin
 
 ## Dependencies
 
-- Coordinated by the root umbrella change [`establish-homebuddy-platform`](../../../../openspec/changes/establish-homebuddy-platform/proposal.md) (rollout step 1). Token format and validation rules are defined once by the root capability `homebuddy-identity-contract`; network, aliases, and ports by `homebuddy-deployment`. authBuddy is the issuer side of that contract.
+- Coordinated by the root umbrella change [`establish-homebuddy-platform`](../../../../../openspec/changes/archive/2026-11-05-establish-homebuddy-platform/proposal.md) (rollout step 1). Token format and validation rules are defined once by the root capability `homebuddy-identity-contract`; network, aliases, and ports by `homebuddy-deployment`. authBuddy is the issuer side of that contract.
 
 ## Impact
 
 - New repository `homeBuddy/authBuddy/` and database `authbuddy`.
-- finanzBuddy ([`adopt-homebuddy-identity`](../../../../finanzBuddy/openspec/changes/adopt-homebuddy-identity/proposal.md)) and calendarBuddy ([`add-calendar-buddy`](../../../../calendarBuddy/openspec/changes/add-calendar-buddy/proposal.md)) become token consumers via JWKS.
+- finanzBuddy ([`adopt-homebuddy-identity`](../../../../../finanzBuddy/openspec/changes/archive/2026-11-05-adopt-homebuddy-identity/proposal.md)) and calendarBuddy ([`add-calendar-buddy`](../../../../../calendarBuddy/openspec/changes/archive/2026-11-05-add-calendar-buddy/proposal.md)) become token consumers via JWKS.
 - New secrets: RSA private key(s) for signing; finanzBuddy's `JWT_SECRET` becomes obsolete after its migration.
