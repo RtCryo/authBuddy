@@ -17,8 +17,9 @@ import org.springframework.stereotype.Service;
 @Service
 class LegacyImport {
 
+    /** A BCrypt hash with a cost of 04 to 31; other costs make sign-in verification throw. */
     private static final Pattern BCRYPT =
-            Pattern.compile("^\\$2[aby]?\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
+            Pattern.compile("^\\$2[aby]?\\$(0[4-9]|[12]\\d|3[01])\\$[./A-Za-z0-9]{53}$");
 
     /** Counts of imported, already present, and rejected rows. */
     record Result(int created, int skipped, int invalid) {

@@ -24,9 +24,14 @@ auth:
 
 server:
   port: 8080
-  # Product UI proxies forward the client address in X-Forwarded-For. Tomcat trusts it only from
-  # private-network proxies, so the rate limiter sees the real client IP and it cannot be spoofed.
+  # Product UI proxies forward the client address in X-Forwarded-For. Tomcat trusts the header only
+  # from loopback and the Docker bridge range 172.16.0.0/12, where the homebuddy network's proxies
+  # live. Tomcat's default also trusts 10/8 and 192.168/16, which are home-LAN ranges: a LAN client
+  # could then pick its own IP and slip past the per-IP rate limit.
   forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: '127\.\d{1,3}\.\d{1,3}\.\d{1,3}|0:0:0:0:0:0:0:1|::1|172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}'
 
 management:
   endpoints:

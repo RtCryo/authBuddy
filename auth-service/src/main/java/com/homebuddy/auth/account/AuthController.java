@@ -38,15 +38,21 @@ class AuthController {
     @PostMapping("/login")
     ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request, HttpServletRequest http) {
-        limit("login", http, request.email());
+        // The attempt is recorded before authenticating so parallel guesses cannot overshoot the
+        // limit; a successful sign-in is released again, so only failed attempts count.
+        AttemptLimiter.Attempt attempt = limit("login", http, request.email());
         Account account = accounts.authenticate(request.email(), request.password());
+        limiter.release(attempt);
         return ResponseEntity.ok(response(account));
     }
 
-    private void limit(String scope, HttpServletRequest http, String email) {
-        if (!limiter.tryAcquire(scope, http.getRemoteAddr(), AccountService.normalize(email))) {
+    private AttemptLimiter.Attempt limit(String scope, HttpServletRequest http, String email) {
+        AttemptLimiter.Attempt attempt =
+                limiter.tryAcquire(scope, http.getRemoteAddr(), AccountService.normalize(email));
+        if (attempt == null) {
             throw new TooManyAttemptsException(limiter.retryAfterSeconds());
         }
+        return attempt;
     }
 
     private AuthResponse response(Account account) {

@@ -82,6 +82,17 @@ class RateLimitTests extends IntegrationTest {
     }
 
     @Test
+    void successfulSignInsDoNotCountAgainstTheLimit() throws Exception {
+        clock.advance(Duration.ofMinutes(5));
+        String body = credentials("frequent-" + UUID.randomUUID() + "@example.com", "long enough");
+        assertThat(post(port, "/auth/register", body).status()).isEqualTo(201);
+
+        for (int attempt = 0; attempt < LIMIT * 2; attempt++) {
+            assertThat(post(port, "/auth/login", body).status()).isEqualTo(200);
+        }
+    }
+
+    @Test
     void registrationAttemptsAreLimitedToo() throws Exception {
         clock.advance(Duration.ofMinutes(5));
         String valid = credentials("limited-" + UUID.randomUUID() + "@example.com", "long enough");

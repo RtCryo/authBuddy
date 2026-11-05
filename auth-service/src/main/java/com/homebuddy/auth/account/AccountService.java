@@ -33,7 +33,10 @@ class AccountService {
         this.dummyHash = passwordEncoder.encode("not-a-real-password");
     }
 
-    @Transactional
+    /**
+     * Not transactional on purpose: the BCrypt hash is computed without holding a database
+     * connection, and the existence check and insert each run in their own repository transaction.
+     */
     Account register(String email, String password) {
         if (!properties.registrationEnabled()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Registration is disabled");

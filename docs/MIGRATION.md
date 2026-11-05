@@ -67,13 +67,16 @@ Running it again with the same file is safe: every row is reported as `skipped`.
 ## 3. Verify
 
 - `created + skipped` equals the number of users exported. If `invalid` is not `0`, find the affected rows in the finanzBuddy `users` table and fix them there, then re-export and re-run; rows already imported are skipped.
-- Sign in with a known finanzBuddy account against authBuddy and confirm `200` with a token:
+- Sign in with a known finanzBuddy account against authBuddy and confirm `200` with a token. The production stack publishes no host port, so call the service from inside its container:
 
   ```bash
-  curl -s -X POST http://localhost:8090/auth/login \
-    -H 'Content-Type: application/json' \
-    -d '{"email":"<known user>","password":"<known password>"}'
+  docker compose -f docker-compose.yml exec -T auth-service \
+    wget -q -O - --header 'Content-Type: application/json' \
+    --post-data '{"email":"<known user>","password":"<known password>"}' \
+    http://localhost:8080/auth/login
   ```
+
+  In local development (with `docker-compose.override.yml`) you can also call `http://localhost:8090/auth/login` from the host.
 
 ## 4. Clean up
 

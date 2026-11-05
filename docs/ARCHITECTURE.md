@@ -13,7 +13,7 @@ There is no UI. Product UIs reach `auth-service` through their `/api/auth/` prox
 
 ## Contracts
 
-The root capabilities live under [`../../openspec/`](../../openspec/) (active umbrella change `establish-homebuddy-platform` until it is archived and synced to `openspec/specs/`).
+The root capabilities live under [`../../openspec/`](../../openspec/) (`openspec/specs/`, synced from the archived umbrella change `establish-homebuddy-platform`).
 
 - Tokens issued: `homebuddy-identity-contract` (RS256, issuer `homebuddy-auth`, subject = account UUID).
 - Network, aliases, and ports: `homebuddy-deployment`. Local host ports: API 8090, PostgreSQL 5434.
@@ -42,7 +42,7 @@ Everything else is denied. Errors are RFC 9457 problem details that never echo s
 
 ## Abuse protection
 
-Sign-in and registration attempts are limited by an in-memory sliding window, separately per client IP and per email (`AUTH_RATE_LIMIT_MAX_ATTEMPTS`, default 10 per minute), and answer `429` with `Retry-After`. The client IP comes from `X-Forwarded-For` only when the request arrives from a private-network proxy (Tomcat's remote-IP handling), so product UI proxies must forward the header (`proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for`). The limiter is per instance and resets on restart.
+Failed sign-ins and all registration attempts are limited by an in-memory sliding window, separately per client IP and per email (`AUTH_RATE_LIMIT_MAX_ATTEMPTS`, default 10 per minute), and answer `429` with `Retry-After`; a successful sign-in does not count. The client IP comes from `X-Forwarded-For` only when the request arrives from loopback or the Docker bridge range `172.16.0.0/12` (`server.tomcat.remoteip.internal-proxies`), never from home-LAN ranges such as `192.168.0.0/16` or `10.0.0.0/8`, so product UI proxies must forward the header (`proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for`). The limiter is per instance and resets on restart.
 
 ## Legacy import
 
@@ -60,4 +60,4 @@ Sign-in and registration attempts are limited by an in-memory sliding window, se
 
 ## Status
 
-Implemented: scaffold, `accounts` migration, register and login, RS256 issuance, the JWKS, the legacy import, the migration runbook, and the Docker stack. Still to come in the change `add-identity-service`: the CI workflow.
+Implemented: scaffold, `accounts` migration, register and login, RS256 issuance, the JWKS, the legacy import, the migration runbook, the Docker stack, and the CI workflow (change `add-identity-service`, archived).
