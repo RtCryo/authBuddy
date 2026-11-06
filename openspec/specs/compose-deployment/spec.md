@@ -7,12 +7,20 @@ Defines how authBuddy runs and how other homeBuddy services reach it.
 ## Requirements
 
 ### Requirement: authBuddy runs as its own stack on the homeBuddy network
-The repository SHALL provide a Docker Compose stack with PostgreSQL and `auth-service`, configured from an `.env` file documented by `.env.example`, with health checks and `authbuddy-` container names. `auth-service` SHALL join the external `homebuddy` network with the alias `auth` and SHALL NOT be published to the host or through Traefik in production. Signing keys and database credentials SHALL NOT be committed.
+The repository SHALL provide a Docker Compose stack with PostgreSQL and `auth-service`, configured from an `.env` file documented by `.env.example`, with health checks and `authbuddy-` container names. `auth-service` SHALL join the external `homebuddy` network with the alias `auth`, and SHALL also join each external identity network defined by the root capability `homebuddy-deployment` with the alias `auth`. `auth-service` SHALL NOT be published to the host or through Traefik in production. The README or deployment documentation SHALL list the `docker network create --internal` command for every identity network. Signing keys and database credentials SHALL NOT be committed.
 
 #### Scenario: Reach authBuddy from another service
-- **WHEN** finanzBuddy or calendarBuddy containers on the `homebuddy` network call `http://auth:8080/.well-known/jwks.json`
-- **THEN** they receive the published keys
+- **WHEN** a product UI container on the `homebuddy` network calls `http://auth:8080/.well-known/jwks.json`
+- **THEN** it receives the published keys
+
+#### Scenario: A product API reaches authBuddy
+- **WHEN** a container on `finanzbuddy-identity` or `calendarbuddy-identity` calls `http://auth:8080/.well-known/jwks.json`
+- **THEN** it receives the published keys
 
 #### Scenario: Not exposed publicly
 - **WHEN** the production stack is running
-- **THEN** `auth-service` is reachable only through the product UIs' `/api/auth` proxies and the internal network
+- **THEN** `auth-service` is reachable only through the product UIs' `/api/auth` proxies and the internal networks
+
+#### Scenario: Missing identity network
+- **WHEN** the stack starts on a host where an identity network does not exist
+- **THEN** startup fails with a message naming the missing network
