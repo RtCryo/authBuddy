@@ -2,7 +2,7 @@
 
 ## Why
 
-The root change [`isolate-product-apis`](../../../../../openspec/changes/archive/2026-11-06-isolate-product-apis/proposal.md) removes the product APIs from the shared `homebuddy` network. Each API then reaches authBuddy over its own internal-only identity network (`finanzbuddy-identity`, `calendarbuddy-identity`) as defined by the root capability `homebuddy-deployment`. authBuddy must be a member of those networks before any API leaves `homebuddy`, or the APIs can no longer fetch the JWKS.
+The root change [`isolate-product-apis`](https://github.com/RtCryo/homeBuddy/blob/main/openspec/changes/archive/2026-11-06-isolate-product-apis/proposal.md) removes the product APIs from the shared `homebuddy` network. Each API then reaches authBuddy over its own internal-only identity network (`finanzbuddy-identity`, `calendarbuddy-identity`) as defined by the root capability `homebuddy-deployment`. authBuddy must be a member of those networks before any API leaves `homebuddy`, or the APIs can no longer fetch the JWKS.
 
 ## What Changes
 

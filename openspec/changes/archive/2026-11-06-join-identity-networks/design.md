@@ -2,7 +2,7 @@
 
 ## Context
 
-See proposal.md for motivation. `auth-service` today joins `homebuddy` (alias `auth`) and the stack's default network. The topology and rationale are in the root [design](../../../../../openspec/changes/archive/2026-11-06-isolate-product-apis/design.md).
+See proposal.md for motivation. `auth-service` today joins `homebuddy` (alias `auth`) and the stack's default network. The topology and rationale are in the root [design](https://github.com/RtCryo/homeBuddy/blob/main/openspec/changes/archive/2026-11-06-isolate-product-apis/design.md).
 
 ## Decisions
 
