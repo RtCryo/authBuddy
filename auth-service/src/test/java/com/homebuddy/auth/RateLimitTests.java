@@ -4,6 +4,7 @@ import static com.homebuddy.auth.HttpSupport.credentials;
 import static com.homebuddy.auth.HttpSupport.post;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -63,6 +64,8 @@ class RateLimitTests extends IntegrationTest {
 
     @Autowired TestClock clock;
 
+    @Autowired MeterRegistry registry;
+
     @Test
     void tooManySignInAttemptsForOneEmailReturn429UntilTheWindowPasses() throws Exception {
         String email = "user-" + UUID.randomUUID() + "@example.com";
@@ -71,9 +74,20 @@ class RateLimitTests extends IntegrationTest {
         for (int attempt = 0; attempt < LIMIT; attempt++) {
             assertThat(post(port, "/auth/login", body).status()).isEqualTo(401);
         }
+        double limitedBefore =
+                registry.get("authbuddy.signin.attempts")
+                        .tag("outcome", "rate_limited")
+                        .counter()
+                        .count();
         var limited = post(port, "/auth/login", body);
 
         assertThat(limited.status()).isEqualTo(429);
+        assertThat(
+                        registry.get("authbuddy.signin.attempts")
+                                .tag("outcome", "rate_limited")
+                                .counter()
+                                .count())
+                .isEqualTo(limitedBefore + 1);
         assertThat(limited.retryAfter()).isEqualTo("60");
 
         clock.advance(Duration.ofSeconds(61));

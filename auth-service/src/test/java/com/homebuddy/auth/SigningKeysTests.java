@@ -6,6 +6,7 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -33,7 +34,8 @@ class SigningKeysTests {
                 new TokenService(
                                 rotated,
                                 TestKeys.properties(newKey.privateKey()),
-                                Clock.systemUTC())
+                                Clock.systemUTC(),
+                                new AuthMetrics(new SimpleMeterRegistry()))
                         .issue(account, "a@example.com");
 
         JWKSet published = rotated.publicKeys();
@@ -123,7 +125,8 @@ class SigningKeysTests {
         return new TokenService(
                 SigningKeys.from(TestKeys.properties(privateKey)),
                 TestKeys.properties(privateKey),
-                Clock.systemUTC());
+                Clock.systemUTC(),
+                new AuthMetrics(new SimpleMeterRegistry()));
     }
 
     private static boolean verifies(String token, JWKSet keys) throws Exception {

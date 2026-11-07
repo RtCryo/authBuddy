@@ -14,6 +14,11 @@
 #   docker network create --internal finanzbuddy-identity
 #   docker network create --internal calendarbuddy-identity
 #
+# It also joins the internal-only network `authbuddy-metrics`, shared only with
+# the central Prometheus, which scrapes /actuator/prometheus on port 8080 (root
+# capability homebuddy-monitoring). Create it once on every host:
+#   docker network create --internal authbuddy-metrics
+#
 # Production: docker compose -f docker-compose.yml up -d
 # Local development also loads docker-compose.override.yml automatically,
 # which publishes the host ports from the root port registry (API 8090,
@@ -77,6 +82,7 @@ services:
       calendarbuddy-identity:
         aliases:
           - auth
+      authbuddy-metrics: {}
 
 secrets:
   auth_signing_key:
@@ -92,6 +98,9 @@ networks:
   calendarbuddy-identity:
     external: true
     name: calendarbuddy-identity
+  authbuddy-metrics:
+    external: true
+    name: authbuddy-metrics
 
 volumes:
   authbuddy-postgres-data:
