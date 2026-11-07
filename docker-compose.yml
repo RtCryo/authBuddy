@@ -7,6 +7,13 @@
 # the network once with `docker network create homebuddy`, or let the root
 # docker-compose.yml create it.
 #
+# It also joins one internal-only identity network per product API with the
+# alias `auth`, so each API fetches the JWKS without sharing a network with
+# the other product (root capability homebuddy-deployment). Create them once
+# on every host, because Compose cannot create them:
+#   docker network create --internal finanzbuddy-identity
+#   docker network create --internal calendarbuddy-identity
+#
 # Production: docker compose -f docker-compose.yml up -d
 # Local development also loads docker-compose.override.yml automatically,
 # which publishes the host ports from the root port registry (API 8090,
@@ -64,6 +71,12 @@ services:
       homebuddy:
         aliases:
           - auth
+      finanzbuddy-identity:
+        aliases:
+          - auth
+      calendarbuddy-identity:
+        aliases:
+          - auth
 
 secrets:
   auth_signing_key:
@@ -73,6 +86,12 @@ networks:
   homebuddy:
     external: true
     name: homebuddy
+  finanzbuddy-identity:
+    external: true
+    name: finanzbuddy-identity
+  calendarbuddy-identity:
+    external: true
+    name: calendarbuddy-identity
 
 volumes:
   authbuddy-postgres-data:
