@@ -4,6 +4,7 @@ import static com.homebuddy.auth.HttpSupport.credentials;
 import static com.homebuddy.auth.HttpSupport.post;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ class RegistrationDisabledTests extends IntegrationTest {
 
     @Autowired JdbcTemplate jdbc;
 
+    @Autowired MeterRegistry registry;
+
     @Test
     void registrationReturns403AndCreatesNothing() throws Exception {
         String email = "user-" + UUID.randomUUID() + "@example.com";
@@ -33,6 +36,12 @@ class RegistrationDisabledTests extends IntegrationTest {
         var reply = post(port, "/auth/register", credentials(email, "correct horse"));
 
         assertThat(reply.status()).isEqualTo(403);
+        assertThat(
+                        registry.get("authbuddy.registrations")
+                                .tag("outcome", "disabled")
+                                .counter()
+                                .count())
+                .isEqualTo(1.0);
         assertThat(
                         jdbc.queryForObject(
                                 "select count(*) from accounts where email_normalized = ?",

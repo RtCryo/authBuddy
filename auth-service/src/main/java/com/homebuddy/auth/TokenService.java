@@ -21,11 +21,13 @@ public class TokenService {
     private final SigningKeys keys;
     private final AuthProperties properties;
     private final Clock clock;
+    private final AuthMetrics metrics;
 
-    TokenService(SigningKeys keys, AuthProperties properties, Clock clock) {
+    TokenService(SigningKeys keys, AuthProperties properties, Clock clock, AuthMetrics metrics) {
         this.keys = keys;
         this.properties = properties;
         this.clock = clock;
+        this.metrics = metrics;
     }
 
     /** Returns a signed RS256 JWT for the account. */
@@ -48,7 +50,9 @@ public class TokenService {
         try {
             SignedJWT jwt = new SignedJWT(header, claims);
             jwt.sign(new RSASSASigner(keys.signingKey()));
-            return jwt.serialize();
+            String token = jwt.serialize();
+            metrics.tokenIssued();
+            return token;
         } catch (JOSEException e) {
             throw new IllegalStateException("The token cannot be signed", e);
         }

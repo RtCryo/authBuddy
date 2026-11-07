@@ -6,7 +6,7 @@ The export file contains password hashes. Treat it as a secret: keep it out of G
 
 ## Before you start
 
-- The external Docker network `homebuddy` exists (`docker network create homebuddy`, or the root `docker-compose.yml`), and so do the internal identity networks (`docker network create --internal finanzbuddy-identity` and `docker network create --internal calendarbuddy-identity`).
+- The external Docker network `homebuddy` exists (`docker network create homebuddy`, or the root `docker-compose.yml`), and so do the internal identity networks (`docker network create --internal finanzbuddy-identity` and `docker network create --internal calendarbuddy-identity`), plus the metrics network `docker network create --internal authbuddy-metrics`.
 - authBuddy is deployed with **`AUTH_REGISTRATION_ENABLED=false`**. Until the import and the finanzBuddy switch are finished, nobody can register, so nobody can claim an existing finanzBuddy email first.
 - finanzBuddy still runs its own sign-in. Do not switch it yet.
 

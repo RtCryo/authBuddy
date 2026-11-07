@@ -9,7 +9,10 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
-/** Stateless baseline: only the health probe, the JWKS, and register/login are public. */
+/**
+ * Stateless baseline: only the health probe, the metrics scrape, the JWKS, and register/login are
+ * public.
+ */
 @Configuration
 @ServerMode
 class SecurityConfig {
@@ -22,6 +25,8 @@ class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/actuator/health/**")
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/actuator/prometheus")
                                         .permitAll()
                                         .requestMatchers(HttpMethod.GET, "/.well-known/jwks.json")
                                         .permitAll()
