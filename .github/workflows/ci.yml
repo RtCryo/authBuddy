@@ -1,0 +1,150 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      auth-service: ${{ steps.filter.outputs.auth-service }}
+      compose: ${{ steps.filter.outputs.compose }}
+      openspec: ${{ steps.filter.outputs.openspec }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # On push to main every filter is true, so main is always fully verified.
+      - name: Detect changed areas
+        id: filter
+        uses: dorny/paths-filter@v4
+        with:
+          predicate-quantifier: some
+          filters: |
+            auth-service:
+              - 'auth-service/**'
+              - '.github/workflows/ci.yml'
+              - 'release-please-config.json'
+            compose:
+              - 'docker-compose*.yml'
+              - '.env.example'
+              - '.github/workflows/ci.yml'
+              - 'release-please-config.json'
+            openspec:
+              - 'openspec/**'
+              - '.github/workflows/ci.yml'
+              - 'release-please-config.json'
+
+  auth-service:
+    name: auth-service
+    needs: changes
+    if: needs.changes.outputs.auth-service == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: auth-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Check code style
+        run: ./mvnw -B spotless:check
+
+      # Docker is preinstalled on ubuntu-latest, which Testcontainers needs.
+      - name: Verify
+        run: ./mvnw -B verify
+
+  image:
+    name: Image auth-service
+    needs: changes
+    if: needs.changes.outputs.auth-service == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build the image without pushing it
+        uses: docker/build-push-action@v7
+        with:
+          context: auth-service
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  compose:
+    name: Compose configuration
+    needs: changes
+    if: needs.changes.outputs.compose == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    # CI-only values for every variable the Compose files require.
+    env:
+      POSTGRES_PASSWORD: ci-postgres-password
+      AUTHBUDDY_VERSION: 0.0.0-ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Validate the production stack
+        run: docker compose -f docker-compose.yml config --quiet
+
+      - name: Validate the development stack
+        run: docker compose config --quiet
+
+  openspec:
+    name: OpenSpec
+    needs: changes
+    if: needs.changes.outputs.openspec == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+
+      - name: Validate OpenSpec changes and specs
+        run: npx --yes @fission-ai/openspec@1.13.2 validate --all --strict --no-interactive
+
+  # The single status check that branch protection requires. It reports on every
+  # pull request and push; skipped jobs count as passed.
+  ci:
+    name: ci
+    if: always()
+    needs: [changes, auth-service, image, compose, openspec]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the results of the needed jobs
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -q -E '"(failure|cancelled)"'; then
+            echo "At least one job failed or was cancelled." >&2
+            exit 1
+          fi
