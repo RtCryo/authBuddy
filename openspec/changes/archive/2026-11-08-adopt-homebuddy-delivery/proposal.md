@@ -2,7 +2,7 @@
 
 ## Why
 
-The root change [`add-homebuddy-ci-and-releases`](../../../../openspec/changes/add-homebuddy-ci-and-releases/proposal.md) defines the root capability `homebuddy-delivery`: one CI workflow with a required `ci` gate, Conventional Commits, release-please releases, and production Compose files that run released images. authBuddy checks only what its path-filtered `auth-service.yml` selects, so no check can be required on `main`; it has no release, so production builds `auth-service` from whatever source is checked out; and it ships no image that operators can pin.
+The root change [`add-homebuddy-ci-and-releases`](https://github.com/RtCryo/homeBuddy/blob/main/openspec/changes/add-homebuddy-ci-and-releases/proposal.md) defines the root capability `homebuddy-delivery`: one CI workflow with a required `ci` gate, Conventional Commits, release-please releases, and production Compose files that run released images. authBuddy checks only what its path-filtered `auth-service.yml` selects, so no check can be required on `main`; it has no release, so production builds `auth-service` from whatever source is checked out; and it ships no image that operators can pin.
 
 ## What Changes
 
