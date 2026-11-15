@@ -1,4 +1,6 @@
 # Local-development overrides, loaded automatically by `docker compose`.
+# Builds auth-service from the working tree and tags it authbuddy-auth-service:dev,
+# so a local build never shadows a released image.
 # Publishes the host ports from the root port registry. Production omits this
 # file (`docker compose -f docker-compose.yml up -d`), so auth-service stays on
 # the internal networks.
@@ -8,5 +10,9 @@ services:
       - "5434:5432"
 
   auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    image: authbuddy-auth-service:dev
     ports:
       - "8090:8080"

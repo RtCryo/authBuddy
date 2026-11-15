@@ -19,7 +19,9 @@
 # capability homebuddy-monitoring). Create it once on every host:
 #   docker network create --internal authbuddy-metrics
 #
-# Production: docker compose -f docker-compose.yml up -d
+# Production runs the released image pinned by AUTHBUDDY_VERSION (see .env.example):
+#   docker compose -f docker-compose.yml pull && docker compose -f docker-compose.yml up -d
+# Roll back by setting the previous released version and running the same commands.
 # Local development also loads docker-compose.override.yml automatically,
 # which publishes the host ports from the root port registry (API 8090,
 # PostgreSQL 5434).
@@ -46,9 +48,7 @@ services:
       - default
 
   auth-service:
-    build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+    image: ghcr.io/rtcryo/authbuddy-auth-service:${AUTHBUDDY_VERSION:?Set AUTHBUDDY_VERSION to a released version (see .env.example)}
     container_name: authbuddy-auth-service
     restart: unless-stopped
     depends_on:
