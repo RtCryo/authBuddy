@@ -69,3 +69,4 @@ Implemented: scaffold, `accounts` migration, register and login, RS256 issuance,
 ## Metrics
 
 `auth-service` serves Prometheus metrics at `/actuator/prometheus` on port 8080 without authentication. The central Prometheus of the root stack scrapes `authbuddy-auth-service:8080` over `authbuddy-metrics` (root capability `homebuddy-monitoring`); the path is not served through any product UI proxy, which forwards only `/api/auth/`. Besides the standard HTTP and JVM metrics it exposes three business metrics whose only label is a fixed `outcome`: `authbuddy_signin_attempts_total` (`success`, `invalid_credentials`, `rate_limited`), `authbuddy_registrations_total` (`success`, `rejected`, `disabled`), and `authbuddy_tokens_issued_total`. They never carry an account id, e-mail address, or client address. The dashboards live in the root `monitoring/` folder.
+
