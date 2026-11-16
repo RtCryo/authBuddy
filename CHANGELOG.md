@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/RtCryo/authBuddy/compare/v1.0.0...v1.1.0) (2026-11-16)
+
+
+### Features
+
+* **auth-service:** export traces to the homeBuddy collector ([#13](https://github.com/RtCryo/authBuddy/issues/13)) ([6168b70](https://github.com/RtCryo/authBuddy/commit/6168b7095c6b4b93c73cf6800d4bb3d641ed9ed8))
+
 ## 1.0.0 (2026-11-15)
 
 
