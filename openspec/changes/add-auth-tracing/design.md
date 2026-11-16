@@ -20,17 +20,17 @@ The exporter is the batch span processor with a bounded queue (2048 spans) and a
 
 ### Actuator requests are not exported
 
-The Compose health check calls `/actuator/health/readiness` every 10 s and Prometheus scrapes `/actuator/prometheus` every 15 s. A `SpanExportingPredicate` bean drops server spans whose `uri` tag starts with `/actuator`. Observations still run, so `http_server_requests` metrics are unchanged.
+The Compose health check calls `/actuator/health/readiness` every 10 s and Prometheus scrapes `/actuator/prometheus` every 15 s. A `SpanExportingPredicate` bean drops server spans whose `uri` tag starts with `/actuator`; the server observation still runs, so `http_server_requests` metrics are unchanged. Spring Security records its own observations (filter chain, authorization) as children of the server span; dropping only the parent would export them as orphan traces. An `ObservationPredicate` therefore skips `spring.security.*` observations whose parent chain leads to a server request for `/actuator/**`.
 
-- *Alternative: an `ObservationPredicate`.* It would also remove the actuator requests from the HTTP metrics, which existing dashboards include.
+- *Alternative: an `ObservationPredicate` for the whole request.* It would also remove the actuator requests from the HTTP metrics, which existing dashboards include.
 
 ### Logs
 
-With Micrometer Tracing on the classpath, Spring Boot's default console pattern includes the correlation id `[<32 hex>-<16 hex>]`, blank outside a trace. authBuddy keeps the default pattern; the rule "never log passwords, hashes, tokens, or e-mail addresses" is unchanged.
+With Micrometer Tracing on the classpath, Spring Boot's default console pattern includes the correlation id `[<32 hex>-<16 hex>]`, blank outside a trace. authBuddy keeps the default pattern; the rule "never log passwords, hashes, tokens, or e-mail addresses" is unchanged. `auth-service` wrote no log line per request so far; `AuthController` now logs each sign-in decision with its outcome only (`Sign-in succeeded`, `Sign-in rejected: invalid credentials`, `Sign-in rejected: rate limited`), so a sign-in can be found in the logs from its trace and the other way round.
 
 ### Privacy
 
-Spring MVC server spans use the route pattern as name (`POST /auth/login`) and record method, status, outcome, and request path, but no headers, query parameters, or bodies. authBuddy adds no custom span attributes. The collector's attribute scrubbing is a second line of defense only.
+Spring MVC server spans are named after the method and route pattern (`http post /auth/login`) and record method, status, outcome, and request path, but no headers, query parameters, or bodies. authBuddy adds no custom span attributes. The collector's attribute scrubbing is a second line of defense only.
 
 ## Risks / Trade-offs
 

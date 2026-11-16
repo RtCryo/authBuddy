@@ -5,6 +5,8 @@ import com.homebuddy.auth.ServerMode;
 import com.homebuddy.auth.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,10 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/auth")
 @ServerMode
 class AuthController {
+
+    // One line per sign-in decision, so the log links to the request's trace (homebuddy-tracing).
+    // Outcome only: never the e-mail address, account id, or client address.
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final AccountService accounts;
     private final TokenService tokens;
@@ -64,6 +70,7 @@ class AuthController {
             attempt = limit("login", http, request.email());
         } catch (TooManyAttemptsException e) {
             metrics.signIn(AuthMetrics.SignIn.RATE_LIMITED);
+            log.info("Sign-in rejected: rate limited");
             throw e;
         }
         Account account;
@@ -71,10 +78,12 @@ class AuthController {
             account = accounts.authenticate(request.email(), request.password());
         } catch (ResponseStatusException e) {
             metrics.signIn(AuthMetrics.SignIn.INVALID_CREDENTIALS);
+            log.info("Sign-in rejected: invalid credentials");
             throw e;
         }
         limiter.release(attempt);
         metrics.signIn(AuthMetrics.SignIn.SUCCESS);
+        log.info("Sign-in succeeded");
         return ResponseEntity.ok(response(account));
     }
 

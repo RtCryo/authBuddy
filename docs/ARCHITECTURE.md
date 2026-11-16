@@ -69,3 +69,13 @@ Implemented: scaffold, `accounts` migration, register and login, RS256 issuance,
 ## Metrics
 
 `auth-service` serves Prometheus metrics at `/actuator/prometheus` on port 8080 without authentication. The central Prometheus of the root stack scrapes `authbuddy-auth-service:8080` over `authbuddy-metrics` (root capability `homebuddy-monitoring`); the path is not served through any product UI proxy, which forwards only `/api/auth/`. Besides the standard HTTP and JVM metrics it exposes three business metrics whose only label is a fixed `outcome`: `authbuddy_signin_attempts_total` (`success`, `invalid_credentials`, `rate_limited`), `authbuddy_registrations_total` (`success`, `rejected`, `disabled`), and `authbuddy_tokens_issued_total`. They never carry an account id, e-mail address, or client address. The dashboards live in the root `monitoring/` folder.
+
+## Tracing
+
+`auth-service` records a trace for every incoming request except `/actuator/**` and sends it with OTLP over HTTP to the central collector `homebuddy-alloy:4318` over `authbuddy-metrics` (root capability [`homebuddy-tracing`](https://github.com/RtCryo/homeBuddy/blob/main/openspec/specs/homebuddy-tracing/spec.md)), using Spring Boot's OpenTelemetry starter. Resource attributes: `service.name = authbuddy-auth-service`, `service.namespace = authbuddy`. A JWKS request from a traced product API continues that API's trace through its W3C `traceparent` header; `auth-service` makes no outgoing calls.
+
+- **Configuration.** `application.yml` sets sampling to 1.0, the resource attributes, and switches off the OTLP metrics and log export that the starter would add. The export endpoint is set only in `docker-compose.yml` (`MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT`), so tests and host runs export nothing. `AUTH_SERVICE_TRACING_SAMPLING_PROBABILITY` in `.env` lowers the sampling probability.
+- **Filtered spans.** `TracingConfiguration` keeps `/actuator/**` (health checks and scrapes) out of the traces: it drops their server span before export and skips the Spring Security observations inside them, whose spans would otherwise be exported without a parent. The HTTP metrics still count these requests.
+- **Logs.** The default console pattern carries `[<traceId>-<spanId>]` inside a trace, which the central Grafana links to the trace. Every sign-in writes one line with its outcome only (`Sign-in succeeded`, `Sign-in rejected: invalid credentials`, `Sign-in rejected: rate limited`).
+- **Privacy.** Spans hold the route, method, status, and Spring Security's decision spans; no headers, bodies, passwords, tokens, or e-mail addresses.
+- **Outages.** Spans that cannot be exported are dropped with a warning; sign-in is unaffected.

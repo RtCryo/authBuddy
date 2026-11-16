@@ -18,6 +18,9 @@
 # the central Prometheus, which scrapes /actuator/prometheus on port 8080 (root
 # capability homebuddy-monitoring). Create it once on every host:
 #   docker network create --internal authbuddy-metrics
+# Over the same network it sends traces with OTLP/HTTP to the central collector
+# homebuddy-alloy:4318 (root capability homebuddy-tracing). Lower the sampling
+# probability with AUTH_SERVICE_TRACING_SAMPLING_PROBABILITY in .env.
 #
 # Production runs the released image pinned by AUTHBUDDY_VERSION (see .env.example):
 #   docker compose -f docker-compose.yml pull && docker compose -f docker-compose.yml up -d
@@ -63,6 +66,8 @@ services:
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       AUTH_REGISTRATION_ENABLED: ${AUTH_REGISTRATION_ENABLED:-true}
       AUTH_RATE_LIMIT_MAX_ATTEMPTS: ${AUTH_RATE_LIMIT_MAX_ATTEMPTS:-10}
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://homebuddy-alloy:4318/v1/traces
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: ${AUTH_SERVICE_TRACING_SAMPLING_PROBABILITY:-1.0}
     secrets:
       - auth_signing_key
     healthcheck:

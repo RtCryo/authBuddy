@@ -11,7 +11,7 @@ Defines how `auth-service` takes part in homeBuddy tracing. The trace pipeline, 
 
 #### Scenario: A user signs in
 - **WHEN** a user signs in through a product UI
-- **THEN** a trace with a `POST /auth/login` server span of `authbuddy-auth-service` is stored in the central trace store
+- **THEN** a trace with a server span of `authbuddy-auth-service` named after the `POST /auth/login` route is stored in the central trace store
 
 #### Scenario: A product API fetches the JWKS in its request
 - **WHEN** a traced product API request fetches `/.well-known/jwks.json` with a `traceparent` header
@@ -19,7 +19,7 @@ Defines how `auth-service` takes part in homeBuddy tracing. The trace pipeline, 
 
 #### Scenario: Health checks and scrapes
 - **WHEN** the health check or the central Prometheus calls `/actuator/**`
-- **THEN** no span of that request is exported
+- **THEN** no span of that request is exported, including spans of filters that run inside it
 
 #### Scenario: Collector unavailable
 - **WHEN** the collector cannot be reached
@@ -40,8 +40,8 @@ Spans of `auth-service` SHALL NOT contain passwords, password hashes, tokens, si
 - **THEN** none is found
 
 ### Requirement: auth-service log lines carry the trace id
-Every log line `auth-service` writes while handling a traced request SHALL contain `[<traceId>-<spanId>]` with the 32- and 16-character lowercase hexadecimal ids of the current span, so the central log store links it to the trace.
+Every log line `auth-service` writes while handling a traced request SHALL contain `[<traceId>-<spanId>]` with the 32- and 16-character lowercase hexadecimal ids of the current span, so the central log store links it to the trace. Every sign-in SHALL write one log line with its outcome and no e-mail address, account identifier, or client address.
 
 #### Scenario: Failed sign-in log line
-- **WHEN** a sign-in fails and `auth-service` logs it
-- **THEN** the log line contains the trace id of that request's trace
+- **WHEN** a sign-in fails
+- **THEN** `auth-service` logs the outcome, and the log line contains the trace id of that request's trace and not the e-mail address
