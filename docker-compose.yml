@@ -33,7 +33,7 @@
 # mounted as a Docker secret; neither it nor .env is committed.
 services:
   postgres:
-    image: postgres:18-alpine
+    image: postgres:19-alpine
     container_name: authbuddy-postgres
     restart: unless-stopped
     environment:
